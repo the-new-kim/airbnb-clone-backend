@@ -6,20 +6,30 @@ class Experience(CommonModel):
     name = models.CharField(max_length=180, default="")
     country = models.CharField(max_length=50, default="Korea")
     city = models.CharField(max_length=80, default="Seoul")
-    host = models.ForeignKey("users.User", on_delete=models.CASCADE)
+    host = models.ForeignKey(
+        "users.User",
+        on_delete=models.CASCADE,
+        related_name="experiences",
+    )
     price = models.PositiveIntegerField()
     start = models.TimeField()
     end = models.TimeField()
     description = models.TextField()
-    host = models.ForeignKey("users.User", on_delete=models.CASCADE)
+    host = models.ForeignKey(
+        "users.User",
+        on_delete=models.CASCADE,
+        related_name="experiences",
+    )
     perks = models.ManyToManyField(
         "experiences.Perk",
+        related_name="experiences",
     )
     category = models.ForeignKey(
         "categories.Category",
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
+        related_name="experiences",
     )
 
     def __str__(self):

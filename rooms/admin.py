@@ -10,13 +10,26 @@ class RoomAdmin(admin.ModelAdmin):
         form.base_fields["category"].queryset = Category.objects.filter(kind="rooms")
         return form
 
-    list_display = ("name", "country", "city", "rooms")
+    list_display = (
+        "name",
+        "country",
+        "city",
+        "rooms",
+        "total_amenities",
+    )
     list_filter = (
         "country",
         "city",
         "pet_friendly",
         "kind",
     )
+
+    def total_amenities(self, room):
+        return room.amenities.count()
+
+    # def total_amenities(self, room):
+    #     print(room.anemities.count())
+    #     return room.anemities.count()
 
 
 @admin.register(Amenity)
