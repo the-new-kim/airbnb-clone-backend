@@ -3,6 +3,17 @@ from .models import Room, Amenity
 from categories.models import Category
 
 # Register your models here.
+
+
+@admin.action(description="Set all prices to zero")
+def reset_prices(model_admin, request, rooms):
+    print("HELOOOOOOOOOO")
+    print(rooms)
+    for room in rooms:
+        room.price = 0
+        room.save()
+
+
 @admin.register(Room)
 class RoomAdmin(admin.ModelAdmin):
     def get_form(self, request, obj=None, **kwargs):
@@ -10,18 +21,28 @@ class RoomAdmin(admin.ModelAdmin):
         form.base_fields["category"].queryset = Category.objects.filter(kind="rooms")
         return form
 
+    actions = (reset_prices,)
+
     list_display = (
         "name",
         "country",
+        "price",
         "city",
         "rooms",
         "total_amenities",
+        "rating",
     )
     list_filter = (
         "country",
         "city",
         "pet_friendly",
         "kind",
+    )
+
+    search_fields = (
+        "name",
+        "^price",
+        "=owner__username",
     )
 
     def total_amenities(self, room):
