@@ -1,0 +1,10 @@
+{% if not not_found %}
+
+<h1>{{room.name}}</h1>
+<h3>{{room.country}}</h3>
+<p>{{room.description}}</p>
+
+{% else %}
+<h1>404</h1>
+
+{% endif %}
