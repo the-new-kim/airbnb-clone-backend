@@ -1,4 +1,5 @@
 from rest_framework.views import APIView
+from django.db import transaction
 from rest_framework.response import Response
 from rest_framework.exceptions import NotFound, NotAuthenticated, ParseError
 from rest_framework.status import HTTP_204_NO_CONTENT
@@ -33,38 +34,23 @@ class Rooms(APIView):
                 # ONE TO ONE
                 # owner = User.objects.get....
                 # room.owener = owner
-                room = serializer.save(
-                    owner=request.user,
-                    category=category,
-                )
-                amenities = request.data.get("amenities")
-                for amenity_pk in amenities:
-                    try:
-                        amenity = Amenity.objects.get(pk=amenity_pk)
-                    except Amenity.DoesNotExist:
-                        raise ParseError(
-                            f"Amenity with id {amenity_pk} does not exist."
+                try:
+                    with transaction.atomic():
+                        room = serializer.save(
+                            owner=request.user,
+                            category=category,
                         )
-                    # Option1️⃣: Fail in silence...
-                    # try:
-                    #     amenity = Amenity.objects.get(pk=amenity_pk)
-                    # except Amenity.DoesNotExist:
-                    #     pass
-
-                    # Option2️⃣: Delete room... (모델을 생성했다가 지우는 것... 다음 모델의 pk(id)가 밀리게 됨...)
-                    # try:
-                    #     amenity = Amenity.objects.get(pk=amenity_pk)
-                    # except Amenity.DoesNotExist:
-                    #     room.delete() 👈
-                    #     raise ParseError(
-                    #         f"Amenity with id {amenity_pk} does not exist."
-                    #     )
+                        amenities = request.data.get("amenities")
+                        for amenity_pk in amenities:
+                            amenity = Amenity.objects.get(pk=amenity_pk)
+                            room.amenities.add(amenity)
+                except Exception:
+                    raise ParseError("Amenity not found.")
 
                     # MANY TO MANY FIELD
                     # amenities = [...]
                     # for amenity in amenities:
                     #   room.amenities.add(amenity) .... add, remove....
-                    room.amenities.add(amenity)
                 serializer = RoomDetailSerializer(room)
                 return Response(serializer.data)
             else:
