@@ -1,9 +1,10 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.exceptions import NotFound
+from rest_framework.exceptions import NotFound, NotAuthenticated, ParseError
 from rest_framework.status import HTTP_204_NO_CONTENT
 from .models import Room, Amenity
 from .serializer import RoomListSerializer, RoomDetailSerializer, AmenitySerializer
+from categories.models import Category
 
 
 class Rooms(APIView):
@@ -13,7 +14,63 @@ class Rooms(APIView):
         return Response(serializer.data)
 
     def post(self, request):
-        pass
+
+        if request.user.is_authenticated:
+            serializer = RoomDetailSerializer(data=request.data)
+            if serializer.is_valid():
+
+                category_pk = request.data.get("category")
+                if not category_pk:
+                    raise ParseError("Category is required.")
+
+                try:
+                    category = Category.objects.get(pk=category_pk)
+                    if category.kind == Category.CategoryChoices.EXPERIENCES:
+                        raise ParseError("The category kind should be 'rooms'.")
+                except Category.DoesNotExist:
+                    raise ParseError("Category does not exist.")
+
+                # ONE TO ONE
+                # owner = User.objects.get....
+                # room.owener = owner
+                room = serializer.save(
+                    owner=request.user,
+                    category=category,
+                )
+                amenities = request.data.get("amenities")
+                for amenity_pk in amenities:
+                    try:
+                        amenity = Amenity.objects.get(pk=amenity_pk)
+                    except Amenity.DoesNotExist:
+                        raise ParseError(
+                            f"Amenity with id {amenity_pk} does not exist."
+                        )
+                    # Option1️⃣: Fail in silence...
+                    # try:
+                    #     amenity = Amenity.objects.get(pk=amenity_pk)
+                    # except Amenity.DoesNotExist:
+                    #     pass
+
+                    # Option2️⃣: Delete room... (모델을 생성했다가 지우는 것... 다음 모델의 pk(id)가 밀리게 됨...)
+                    # try:
+                    #     amenity = Amenity.objects.get(pk=amenity_pk)
+                    # except Amenity.DoesNotExist:
+                    #     room.delete() 👈
+                    #     raise ParseError(
+                    #         f"Amenity with id {amenity_pk} does not exist."
+                    #     )
+
+                    # MANY TO MANY FIELD
+                    # amenities = [...]
+                    # for amenity in amenities:
+                    #   room.amenities.add(amenity) .... add, remove....
+                    room.amenities.add(amenity)
+                serializer = RoomDetailSerializer(room)
+                return Response(serializer.data)
+            else:
+                return Response(serializer.errors)
+        else:
+            raise NotAuthenticated
 
 
 class RoomDetail(APIView):

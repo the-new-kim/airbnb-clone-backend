@@ -26,10 +26,17 @@ class RoomListSerializer(ModelSerializer):
 
 
 class RoomDetailSerializer(ModelSerializer):
-    owner = TinyUserSerializer()
-    amenities = AmenitySerializer(many=True)
-    category = CategorySerializer()
+    owner = TinyUserSerializer(read_only=True)
+    amenities = AmenitySerializer(read_only=True, many=True)
+    category = CategorySerializer(read_only=True)
 
     class Meta:
         model = Room
         fields = "__all__"
+
+    # def create(self, validated_data):
+    #     return
+
+    # def create(self, validated_data):
+    #     print(validated_data)
+    #     return Room.objects.create(**validated_data)
