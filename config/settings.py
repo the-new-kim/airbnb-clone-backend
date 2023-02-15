@@ -144,3 +144,10 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # Custom User AUTH_USER_MODEL = 'myapp.MyUserModel'
 
 AUTH_USER_MODEL = "users.User"
+
+# For files...
+
+# Where files actually located... ⚠️ No slash "/" needs! ❌ "/uploads"
+MEDIA_ROOT = "uploads"
+# For browser...
+MEDIA_URL = "user-uploads/"

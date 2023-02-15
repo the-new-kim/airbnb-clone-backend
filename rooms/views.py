@@ -182,6 +182,11 @@ class RoomAmenities(APIView):
         return Response(serializer.data)
 
 
+class RoomPhotos(APIView):
+    def post(self, request, pk):
+        pass
+
+
 class Amenities(APIView):
     def get(self, request):
         all_amenities = Amenity.objects.all()
