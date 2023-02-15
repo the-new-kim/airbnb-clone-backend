@@ -15,7 +15,7 @@ from categories.models import Category
 from reviews.serializers import ReiviewSerializer
 from medias.serializers import PhotoSeriailzer
 from bookings.models import Booking
-from bookings.serializers import PublicBookingSerializer
+from bookings.serializers import PublicBookingSerializer, CrerateBookingSerializer
 
 
 class Rooms(APIView):
@@ -66,7 +66,8 @@ class Rooms(APIView):
                 # for amenity in amenities:
                 #   room.amenities.add(amenity) .... add, remove....
             serializer = RoomDetailSerializer(room)
-            return Response(serializer.data)
+            # return Response(serializer.data)
+            pass
         else:
             return Response(serializer.errors)
 
@@ -221,11 +222,11 @@ class RoomPhotos(APIView):
 class RoomBookings(APIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
 
-    # def get_object(self, pk):
-    #     try:
-    #         return Room.objects.get(pk=pk)
-    #     except Room.DoesNotExist:
-    #         raise NotFound
+    def get_object(self, pk):
+        try:
+            return Room.objects.get(pk=pk)
+        except Room.DoesNotExist:
+            raise NotFound
 
     def get(self, request, pk):
         # room = self.get_object(pk)
@@ -240,7 +241,20 @@ class RoomBookings(APIView):
         serializer = PublicBookingSerializer(bookings, many=True)
         return Response(serializer.data)
 
-        # return Response(serializer.data)
+    def post(self, request, pk):
+        serializer = CrerateBookingSerializer(data=request.data)
+        if serializer.is_valid():
+            room = self.get_object(pk)
+            booking = serializer.save(
+                user=request.user,
+                room=room,
+                kind=Booking.BookingKindChoices.ROOM,
+            )
+            serializer = PublicBookingSerializer(booking)
+            return Response(serializer.data)
+
+        else:
+            return Response(serializer.errors)
 
 
 class Amenities(APIView):

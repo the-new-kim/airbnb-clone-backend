@@ -10,7 +10,7 @@
 - /rooms/:pk/reviews ............(GET✅, POST✅, PUT, DELETE)
 - /rooms/:pk/photos .............(POST✅)
 
-- /rooms/:pk/bookings ...........(GET, POST)
+- /rooms/:pk/bookings ...........(GET✅, POST✅)
 - /rooms/:pk/bookings/:pk .......(GET, PUT, DELETE)
 
 - /medias/photos/:pk ............(DELETE✅)
