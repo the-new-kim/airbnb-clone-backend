@@ -38,4 +38,4 @@
 - /experiences/:pk/bookings .....(GET, POST)
 - /experiences/:pk/bookings/:pk .(GET, PUT, DELETE)
 
-- /experiences/:pk/photos .....(POST)
+- /experiences/:pk/photos .......(POST)
