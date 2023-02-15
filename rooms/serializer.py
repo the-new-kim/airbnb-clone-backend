@@ -22,6 +22,7 @@ class RoomListSerializer(ModelSerializer):
             "country",
             "city",
             "price",
+            "owner",
         )
 
 
