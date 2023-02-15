@@ -9,14 +9,18 @@ from rest_framework.exceptions import (
 )
 from rest_framework.status import HTTP_204_NO_CONTENT
 from .models import Room, Amenity
-from .serializer import RoomListSerializer, RoomDetailSerializer, AmenitySerializer
+from .serializers import RoomListSerializer, RoomDetailSerializer, AmenitySerializer
 from categories.models import Category
 
 
 class Rooms(APIView):
     def get(self, request):
         all_rooms = Room.objects.all()
-        serializer = RoomListSerializer(all_rooms, many=True)
+        serializer = RoomListSerializer(
+            all_rooms,
+            many=True,
+            context={"request": request},
+        )
         return Response(serializer.data)
 
     def post(self, request):
@@ -73,7 +77,10 @@ class RoomDetail(APIView):
 
     def get(self, request, pk):
         room = self.get_object(pk=pk)
-        serializer = RoomDetailSerializer(room)
+        serializer = RoomDetailSerializer(
+            room,
+            context={"request": request},
+        )
         return Response(serializer.data)
 
     def put(self, request, pk):
