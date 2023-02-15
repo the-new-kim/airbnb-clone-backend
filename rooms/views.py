@@ -11,6 +11,7 @@ from rest_framework.status import HTTP_204_NO_CONTENT
 from .models import Room, Amenity
 from .serializers import RoomListSerializer, RoomDetailSerializer, AmenitySerializer
 from categories.models import Category
+from reviews.serializers import ReiviewSerializer
 
 
 class Rooms(APIView):
@@ -127,6 +128,58 @@ class RoomDetail(APIView):
             raise PermissionDenied
         room.delete()
         return Response(HTTP_204_NO_CONTENT)
+
+
+class RoomReviews(APIView):
+    def get_object(self, pk):
+        try:
+            return Room.objects.get(pk=pk)
+        except Room.DoesNotExist:
+            raise NotFound
+
+    def get(self, request, pk):
+        try:
+            page = request.query_params.get("page", 1)
+            page = int(page)
+        except ValueError:
+            page = 1
+
+        room = self.get_object(pk)
+        page_size = 5
+        start = (page - 1) * page_size
+        end = start + page_size
+
+        all_reviews = room.reviews.all()[start:end]
+        serializer = ReiviewSerializer(
+            all_reviews,
+            many=True,
+        )
+        return Response(serializer.data)
+
+
+class RoomAmenities(APIView):
+    def get_object(self, pk):
+        try:
+            return Room.objects.get(pk=pk)
+        except Room.DoesNotExist:
+            raise NotFound
+
+    def get(self, request, pk):
+        try:
+            page = request.query_params.get("page", 1)
+            page = int(page)
+        except ValueError:
+            page = 1
+        room = self.get_object(pk)
+        page_size = 5
+        start = (page - 1) * page_size
+        end = start + page_size
+        all_amenities = room.amenities.all()[start:end]
+        serializer = AmenitySerializer(
+            all_amenities,
+            many=True,
+        )
+        return Response(serializer.data)
 
 
 class Amenities(APIView):
