@@ -11,5 +11,6 @@ urlpatterns = [
     path("logout/", views.Logout.as_view()),
     path("token-login/", obtain_auth_token),  # login with auth Token
     path("jwt-login/", views.JWTLogin.as_view()),  # login with JWT
+    path("github/", views.GithubLogin.as_view()),
     path("@<str:username>/", views.PublicUser.as_view()),
 ]

@@ -94,7 +94,11 @@ class RoomDetail(APIView):
         if room.owner != request.user:
             raise PermissionDenied
 
-        serializer = RoomDetailSerializer(room, data=request.data, partial=True)
+        serializer = RoomDetailSerializer(
+            room,
+            data=request.data,
+            partial=True,
+        )
 
         if serializer.is_valid():
             # 1️⃣ Category
