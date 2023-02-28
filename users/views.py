@@ -43,11 +43,14 @@ class Users(APIView):
     #     return Response({"ok": True})
 
     def post(self, request):
+        print("DATA::::", request.data)
         password = request.data.get("password")
         if not password:
             raise ParseError
         serializer = serializers.PrivateUserSerializer(data=request.data)
+
         if serializer.is_valid():
+            print("IS VALID!!!!")
             user = serializer.save()
             user.set_password(password)
             user.save()
@@ -55,6 +58,8 @@ class Users(APIView):
             return Response(serializer.data)
 
         else:
+            print("NOT VALID!!!!")
+
             return Response(serializer.errors)
 
 
@@ -89,6 +94,7 @@ class Login(APIView):
     def post(self, request):
         username = request.data.get("username")
         password = request.data.get("password")
+        print("USERNAME & PASSWORD:::", username, password)
         if not username or not password:
             raise ParseError
         user = authenticate(
@@ -157,15 +163,12 @@ class GithubLogin(APIView):
             )
             user_data = user_data.json()
 
-            print("USERNAME::::", user_data.get("login"))
-
             try:
                 user = User.objects.get(email=user_data.get("email"))
                 login(request, user)
-                print("STATUS:::: LOGEED IN!", status.HTTP_200_OK)
+
                 return Response(status=status.HTTP_200_OK)
             except User.DoesNotExist:
-                print("CREATE NEW USER")
                 user = User.objects.create(
                     username=user_data.get("login"),
                     email=user_data.get("email"),
@@ -175,11 +178,53 @@ class GithubLogin(APIView):
                 user.set_unusable_password()  # Only for OAuth login. loginig with using username & password will not allowed.
                 user.save()
                 login(request, user)
-
-                print("STATUS::::", status.HTTP_200_OK)
-
                 return Response(status=status.HTTP_200_OK)
         except Exception:
-            print("STATUS::::", status.HTTP_400_BAD_REQUEST)
-
             return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
+#   try:
+#             username = request.data.get("username")
+#             name = request.data.get("name")
+#             email = request.data.get("email")
+#             password = request.data.get("password")
+
+#             # try:
+#             email_taken = User.objects.filter(email=email).exists()
+#             username_taken = User.objects.filter(username=username).exists()
+#             print("EMAIL TAKEN::::")
+
+#             if email_taken or username_taken:
+#                 if email_taken:
+#                     print("EMAIL!")
+#                     return Response(
+#                         {"error": "This email has already been taken"},
+#                         status=status.HTTP_400_BAD_REQUEST,
+#                     )
+#                 else:
+#                     print("USERNAME!")
+#                     return Response(
+#                         {"error": "This username has already been taken"},
+#                         status=status.HTTP_400_BAD_REQUEST,
+#                     )
+
+#             # except User.DoesNotExist:
+#             print("USER DOES NOT EXIT")
+#             user = User.objects.create(
+#                 username=username,
+#                 email=email,
+#                 name=name,
+#             )
+#             print("USER::::", user)
+#             user.set_password(password)
+#             print("PASWORD SETTED")
+
+#             user.save()
+#             print("USER SAVED!")
+
+#             login(request, user)
+#             return Response(status=status.HTTP_200_OK)
+#         except Exception:
+#             print("SOMETHING WRONG")
+
+#             return Response(status=status.HTTP_400_BAD_REQUEST)
